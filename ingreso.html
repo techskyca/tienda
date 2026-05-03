@@ -42,6 +42,10 @@
                 <label for="categoria">Categoría:</label>
                 <input type="text" id="categoria" name="categoria">
             </div>
+            <div class="form-group">
+                <label for="imagen_url">URL de la Imagen:</label>
+                <input type="url" id="imagen_url" name="imagen_url">
+            </div>
             <button type="submit" class="btn-save">Guardar</button>
             <button type="button" id="clearBtn" class="btn-clear">Borrar</button>
         </form>
@@ -67,7 +71,8 @@
                 descripcion: document.getElementById('descripcion').value,
                 precio: parseFloat(document.getElementById('precio').value),
                 stock: parseInt(document.getElementById('stock').value),
-                categoria: document.getElementById('categoria').value
+                categoria: document.getElementById('categoria').value,
+                imagen_url: document.getElementById('imagen_url').value
             };
 
             try {

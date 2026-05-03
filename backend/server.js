@@ -69,7 +69,8 @@ app.post("/api/insert-products", async (req, res) => {
                 descripcion TEXT,
                 precio DECIMAL(10, 2) NOT NULL,
                 stock INT NOT NULL,
-                categoria VARCHAR(255)
+                categoria VARCHAR(255),
+                imagen_url VARCHAR(255)
             );
         `);
 
@@ -111,8 +112,8 @@ app.post("/api/productos", async (req, res) => {
             );
         `);
 
-        const query = 'INSERT INTO productos (nombre, descripcion, precio, stock, categoria) VALUES ($1, $2, $3, $4, $5) RETURNING *';
-        const values = [nombre, descripcion, precio, stock, categoria];
+        const query = 'INSERT INTO productos (nombre, descripcion, precio, stock, categoria, imagen_url) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *';
+        const values = [nombre, descripcion, precio, stock, categoria, imagen_url];
         
         const result = await client.query(query, values);
         client.release();
