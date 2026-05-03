@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ingreso de Productos - Tienda</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; }
+        input, textarea { width: 100%; padding: 8px; box-sizing: border-box; }
+        button { padding: 10px 20px; cursor: pointer; }
+        .btn-save { background-color: #28a745; color: white; border: none; }
+        .btn-clear { background-color: #dc3545; color: white; border: none; }
+        #message { margin-top: 20px; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Ingresar Nuevo Producto</h1>
+        <nav><a href="/">Volver a Inicio</a></nav>
+    </header>
+    <main>
+        <form id="productForm">
+            <div class="form-group">
+                <label for="nombre">Nombre del Producto:</label>
+                <input type="text" id="nombre" name="nombre" required>
+            </div>
+            <div class="form-group">
+                <label for="descripcion">Descripción:</label>
+                <textarea id="descripcion" name="descripcion" rows="3"></textarea>
+            </div>
+            <div class="form-group">
+                <label for="precio">Precio:</label>
+                <input type="number" id="precio" name="precio" step="0.01" required>
+            </div>
+            <div class="form-group">
+                <label for="stock">Stock:</label>
+                <input type="number" id="stock" name="stock" required>
+            </div>
+            <div class="form-group">
+                <label for="categoria">Categoría:</label>
+                <input type="text" id="categoria" name="categoria">
+            </div>
+            <button type="submit" class="btn-save">Guardar</button>
+            <button type="button" id="clearBtn" class="btn-clear">Borrar</button>
+        </form>
+        <div id="message"></div>
+    </main>
+
+    <script>
+        const form = document.getElementById('productForm');
+        const clearBtn = document.getElementById('clearBtn');
+        const messageDiv = document.getElementById('message');
+
+        clearBtn.addEventListener('click', () => {
+            form.reset();
+            messageDiv.textContent = '';
+        });
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            messageDiv.textContent = 'Guardando...';
+
+            const formData = {
+                nombre: document.getElementById('nombre').value,
+                descripcion: document.getElementById('descripcion').value,
+                precio: parseFloat(document.getElementById('precio').value),
+                stock: parseInt(document.getElementById('stock').value),
+                categoria: document.getElementById('categoria').value
+            };
+
+            try {
+                const response = await fetch('/api/productos', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formData)
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    messageDiv.textContent = 'Producto guardado con éxito!';
+                    messageDiv.style.color = 'green';
+                    form.reset();
+                } else {
+                    messageDiv.textContent = 'Error: ' + result.error;
+                    messageDiv.style.color = 'red';
+                }
+            } catch (error) {
+                messageDiv.textContent = 'Error de conexión al servidor.';
+                messageDiv.style.color = 'red';
+            }
+        });
+    </script>
+</body>
+</html>
