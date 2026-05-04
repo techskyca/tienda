@@ -39,6 +39,22 @@ app.get('/api/test-db', async (req, res) => {
     }
 });
 
+// API to check table structure
+app.get('/api/check-table', async (req, res) => {
+    try {
+        const client = await pool.connect();
+        const result = await client.query(`
+            SELECT column_name, data_type
+            FROM information_schema.columns
+            WHERE table_name = 'productos'
+        `);
+        client.release();
+        res.status(200).json({ columns: result.rows });
+    } catch (err) {
+        res.status(500).json({ error: 'Error checking table', details: err.message });
+    }
+});
+
 // Function to generate random product data
 const generateRandomProduct = () => {
     const productNames = ["Limpiador Multiusos", "Detergente Líquido", "Suavizante de Telas", "Lavaplatos", "Desinfectante", "Limpiacristales", "Cera para Pisos", "Ambientador", "Blanqueador", "Jabón en Barra"];
@@ -92,29 +108,29 @@ app.post("/api/insert-products", async (req, res) => {
 
 // API to insert a single product from form
 app.post("/api/productos", async (req, res) => {
-    const { nombre, descripcion, precio, stock, categoria, imagen_url } = req.body;
+    const { nombre, descripcion, precio, stock, categoria, imagen_url, presentacion, precio_costo, precio_detal, precio_mayor, precio_distribuidor } = req.body;
     
-    if (!nombre || precio === undefined || stock === undefined) {
-        return res.status(400).json({ error: "Faltan campos obligatorios (nombre, precio, stock)" });
+    if (!nombre) {
+        return res.status(400).json({ error: "Faltan campos obligatorios (nombre)" });
     }
 
     try {
         const client = await pool.connect();
-        // Ensure table exists (optional but safe)
-        await client.query(`
-            CREATE TABLE IF NOT EXISTS productos (
-                id SERIAL PRIMARY KEY,
-                nombre VARCHAR(255) NOT NULL,
-                descripcion TEXT,
-                precio DECIMAL(10, 2) NOT NULL,
-                stock INT NOT NULL,
-                categoria VARCHAR(255),
-                imagen_url VARCHAR(255)
-            );
-        `);
 
-        const query = 'INSERT INTO productos (nombre, descripcion, precio, stock, categoria, imagen_url) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *';
-        const values = [nombre, descripcion, precio, stock, categoria, imagen_url];
+        const query = `INSERT INTO productos (nombre, descripcion, cantidad_inventario, categoria, imagen_base64, presentacion, precio_costo, precio_detal, precio_mayor, precio_distribuidor)
+                      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING *`;
+        const values = [
+            nombre,
+            descripcion || '',
+            stock || 0,
+            categoria || '',
+            imagen_url || '',
+            presentacion || '',
+            precio_costo || precio || 0,
+            precio_detal || precio || 0,
+            precio_mayor || 0,
+            precio_distribuidor || 0
+        ];
         
         const result = await client.query(query, values);
         client.release();
